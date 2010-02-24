@@ -1,0 +1,6 @@
+Mixture of Gaussians implementation that is supposed to be
+gradually moved from scipy to a mostly Theano based implementation.
+
+For Theano visit:
+
+    http://deeplearning.net/software/theano/
