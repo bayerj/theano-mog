@@ -15,8 +15,8 @@ import matplotlib.mlab as mlab
 
 import theano
 import theano.tensor as T
-from theano.sandbox.inv import inv as T_inv
-from theano.sandbox.det import det as T_det
+from theanoext import inv as T_inv, det as T_det
+
 
 def make_optparse():
   parser = optparse.OptionParser()
