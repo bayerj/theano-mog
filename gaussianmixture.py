@@ -166,10 +166,10 @@ class GaussianMixture(object):
 
 
 def load_data(xfile, yfile):
-  xs = (i for i in open(xfile).xreadlines() if i.strip())
-  ys = (i for i in open(yfile).readlines() if i.strip())
-  xs = [float(i.strip()) for i in xs]
-  ys = [float(i.strip()) for i in ys]
+  loadfile = lambda fn: [float(i.strip()) for i in open(fn).xreadlines() 
+                         if i.strip()]
+  xs = loadfile(xfile)
+  ys = loadfile(yfile)
   return xs, ys
 
 
