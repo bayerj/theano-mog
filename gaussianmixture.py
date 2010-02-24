@@ -88,7 +88,7 @@ class GaussianMixture(object):
 
     means = scipy.random.standard_normal((degree, dim)) * scale
 
-    randomdata = (scipy.random.standard_normal((dim, 10)) * scale 
+    randomdata = (scipy.random.standard_normal((dim, 10)) * scale
                      for _ in xrange(degree))
     covs = [scipy.cov(i) for i in randomdata]
     return cls(mixcoeffs, means, covs)
@@ -116,8 +116,8 @@ class GaussianMixture(object):
     return resps
 
   def _point_expectations(self, data, resps):
-    """Return the expected points per mode. 
-    
+    """Return the expected points per mode.
+
     Bishop (9.27)"""
     point_exp = resps.sum(axis=0)
     return point_exp
@@ -150,8 +150,8 @@ class GaussianMixture(object):
     return covs
 
   def _mixcoeffs(self, data, point_exp):
-    """Calculate the new mixing coefficients. 
-    
+    """Calculate the new mixing coefficients.
+
     Bishop (9.26)"""
     return point_exp / data.shape[0]
 
@@ -168,8 +168,8 @@ class GaussianMixture(object):
 def load_data(xfile, yfile):
   xs = (i for i in open(xfile).xreadlines() if i.strip())
   ys = (i for i in open(yfile).readlines() if i.strip())
-  xs = [float(i.strip().replace(',', '.')) for i in xs]
-  ys = [float(i.strip().replace(',', '.')) for i in ys]
+  xs = [float(i.strip()) for i in xs]
+  ys = [float(i.strip()) for i in ys]
   return xs, ys
 
 
