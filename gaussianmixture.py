@@ -28,9 +28,6 @@ def make_optparse():
                     help='give the path to the data file containing x values')
   parser.add_option('--yfilename', type='str', dest='yfilename',
                     help='give the path to the data file containing y values')
-  parser.add_option('--plot', action='store_true', dest='plot',
-                    help="""plot the data and the mixture - only for 1D and 2D
-                    data""")
 
   return parser
 
@@ -191,8 +188,6 @@ def plot_mixture(fig, mixture, data):
 
   Z = None
   for i in range(mixture.degree):
-    #z = mixture.mixcoeffs[i] * mgd(coords, mixture.means[i], mixture.covs[i])
-
     gaussian = MultivariateGaussianDensity(mixture.means[i], mixture.covs[i])
     z = mixture.mixcoeffs[i] * gaussian.multpdf(coords)
 
@@ -211,9 +206,7 @@ def plot_mixture(fig, mixture, data):
 
 def main():
   options, args = make_optparse().parse_args()
-
   data = load_data(options.xfilename, options.yfilename)
-
   mixture = GaussianMixture.randomized(4, 2, 30)
 
   plt.ion()
