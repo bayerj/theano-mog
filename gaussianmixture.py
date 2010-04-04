@@ -24,11 +24,14 @@ def make_optparse():
                     help='adjust the amount of modes of the mixture')
   parser.add_option('--epochs', type='int', dest='epochs', default=100,
                     help='specify the number of epochs to train')
+  parser.add_option('--report', type='int', dest='report', default=10,
+                    help='''specify the number of epochs to train between
+                    reports''')
   parser.add_option('--filename', type='str', dest='filename',
                     help='filename that contains the data.')
-  #parser.add_option('--plot', action='store_true', dest='plot',
-  #                  help="""plot the data and the mixture - only for 1D and 2D
-  #                  data""")
+  parser.add_option('--plot', action='store_true', dest='plot',
+                    help="""plot the data and the mixture - only for 2D
+                    data""")
 
   return parser
 
@@ -209,7 +212,6 @@ def plot_mixture(fig, mixture, data):
 
   CS = plt.contour(X, Y, Z, 30)
   plt.plot(mixture.means[:, 1], mixture.means[:, 0], 'o', color='green')
-  print mixture.means
 
 
 def main():
@@ -217,27 +219,42 @@ def main():
   data = load_data(options.filename)
   dim = data.shape[1]
 
+  do_plot = options.plot and dim == 2
+
   print "Number of data points:", data.shape[0]
   print "Dimensionality of data points:", dim
-  print "Number of modes", options.degree
+  print "Number of modes:", options.degree
+  print "=" * 40
 
   mixture = GaussianMixture.randomized(options.degree, dim, 30)
 
-  if dim == 2:
+  if do_plot:
     plt.ion()
-  for i in range(10):
-    mixture.fit(data, epochs=options.epochs / 10)
-    if dim == 2:
+
+  # Calculate the number of epochs in each iteration. The last iteration will
+  # fill up to the desired number of total epochs, the previous ones will be
+  # exactly the amount of iterations wanted between each report.
+  full, rest = divmod(options.epochs, options.report)
+  epochs = [options.report] * full + [rest]
+  trained = 0
+  for e in epochs: 
+    mixture.fit(data, epochs=e)
+    trained += e
+    if do_plot:
       plt.clf()
       plot_mixture(111, mixture, data)
-    raw_input("Hit return to continue fitting...")
+    for i in range(options.degree):
+      print "Mode", i
+      print "Mixing coefficient %.3f" % mixture.mixcoeffs[i]
+      print "Mean:", " ".join("%.2f" % j for j in mixture.means[i])
+      print "Covariance: \n", mixture.covs[i]
+      print
 
-  print mixture.mixcoeffs
-  print "-" * 80
-  print mixture.means
-  print "-" * 80
-  print mixture.covs
-  print "-" * 80
+    print "Log likelihood:", mixture.loglikelihood(data)
+    print "Epochs trained:", trained 
+    print "=" * 80
+    if do_plot:
+      raw_input("Hit return to continue fitting...")
 
   return 0
 
