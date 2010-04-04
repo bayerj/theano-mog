@@ -5,6 +5,8 @@ needed here."""
 __author__ = 'Justin Bayer, bayer.justin@googlemail.com'
 
 
+import sys
+
 import numpy, scipy.linalg
 from theano import gof, tensor, scalar
 
@@ -36,11 +38,11 @@ class Inv(gof.Op):
         return gof.Apply(op=self, inputs=[A], outputs=[otype()])
 
     def perform(self, node, (A,), (output, )):
-        ret=scipy.linalg.inv(A)
+        ret = scipy.linalg.inv(A)
         if ret.dtype != node.outputs[0].dtype:
             print >> sys.stderr, "WARNING: Solve.perform() required cast."
             ret = theano._asarray(ret, dtype=node.outputs[0].dtype)
-        output[0]=ret
+        output[0] = ret
 
 inv = Inv()
 

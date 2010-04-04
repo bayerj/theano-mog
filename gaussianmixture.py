@@ -20,14 +20,15 @@ from theanoext import inv as T_inv, det as T_det
 
 def make_optparse():
   parser = optparse.OptionParser()
-  parser.add_option('--degree', type='int', dest='amount_means',
-                    help='adjust the amount of means of the mixture')
+  parser.add_option('--degree', type='int', dest='degree',
+                    help='adjust the amount of modes of the mixture')
   parser.add_option('--epochs', type='int', dest='epochs', default=100,
                     help='specify the number of epochs to train')
-  parser.add_option('--xfilename', type='str', dest='xfilename',
-                    help='give the path to the data file containing x values')
-  parser.add_option('--yfilename', type='str', dest='yfilename',
-                    help='give the path to the data file containing y values')
+  parser.add_option('--filename', type='str', dest='filename',
+                    help='filename that contains the data.')
+  #parser.add_option('--plot', action='store_true', dest='plot',
+  #                  help="""plot the data and the mixture - only for 1D and 2D
+  #                  data""")
 
   return parser
 
@@ -85,6 +86,7 @@ class GaussianMixture(object):
 
     means = scipy.random.standard_normal((degree, dim)) * scale
 
+    # Generate random covariances by generating random data.
     randomdata = (scipy.random.standard_normal((dim, 10)) * scale
                      for _ in xrange(degree))
     covs = [scipy.cov(i) for i in randomdata]
@@ -162,22 +164,19 @@ class GaussianMixture(object):
     self.mixcoeffs = self._mixcoeffs(data, point_exp)
 
 
-def load_data(xfile, yfile):
-  loadfile = lambda fn: [float(i.strip()) for i in open(fn).xreadlines() 
-                         if i.strip()]
-  xs = loadfile(xfile)
-  ys = loadfile(yfile)
-  return xs, ys
+def load_data(filename):
+  return scipy.loadtxt(filename)
 
 
 def plot_mixture(fig, mixture, data):
   plt.subplot(fig)
 
   # Plot data.
-  plt.scatter(data[0], data[1], color='r', marker='+', alpha=0.5)
+  plt.scatter(data[:, 0], data[:, 1], color='r', marker='+', alpha=0.5)
 
   delta = 1.0
   coords = []
+  # TODO: Should be configurable...
   xs = scipy.arange(-30, 30, delta)
   ys = scipy.arange(-30, 30, delta)
   for x in xs:
@@ -206,15 +205,23 @@ def plot_mixture(fig, mixture, data):
 
 def main():
   options, args = make_optparse().parse_args()
-  data = load_data(options.xfilename, options.yfilename)
-  mixture = GaussianMixture.randomized(4, 2, 30)
+  data = load_data(options.filename)
+  dim = data.shape[1]
 
-  plt.ion()
+  print "Number of data points:", data.shape[0]
+  print "Dimensionality of data points:", dim
+  print "Number of modes", options.degree
+
+  mixture = GaussianMixture.randomized(options.degree, dim, 30)
+
+  if dim == 2:
+    plt.ion()
   for i in range(10):
-    mixture.fit(zip(*data), epochs=options.epochs / 10)
-    plot_mixture(111, mixture, data)
+    mixture.fit(data, epochs=options.epochs / 10)
+    if dim == 2:
+      plt.clf()
+      plot_mixture(111, mixture, data)
     raw_input("Hit return to continue fitting...")
-    plt.clf()
 
   print mixture.mixcoeffs
   print "-" * 80
