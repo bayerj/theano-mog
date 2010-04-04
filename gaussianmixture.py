@@ -163,6 +163,15 @@ class GaussianMixture(object):
     self.covs = self._covs(data, self.resps, point_exp, self.means)
     self.mixcoeffs = self._mixcoeffs(data, point_exp)
 
+  def loglikelihood(self, data):
+    """Return the logarithmized likelihood of the data given the mixture."""
+    res = 0
+    llh = scipy.zeros((data.shape[0], self.degree))
+    for i in range(self.degree):
+      mvg = MultivariateGaussianDensity(self.means[i], self.covs[i])
+      llh[:, i] = self.mixcoeffs[i] * mvg.multpdf(data)
+    return scipy.log(llh.sum(axis=1)).sum()
+
 
 def load_data(filename):
   return scipy.loadtxt(filename)
